@@ -1,0 +1,17 @@
+version: '2'
+
+services: 
+  gpt:
+    image: u03013112/gpt:v1
+    container_name: 'gpt_helper'
+    tty: true
+    volumes:
+        - ../src:/src
+    ports:
+      - 2999:8000
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "1"
+  
