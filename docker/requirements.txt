@@ -6,3 +6,6 @@ scipy
 
 mwclient
 mwparserfromhell
+
+flask
+flask_cors

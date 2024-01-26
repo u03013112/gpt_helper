@@ -28,3 +28,11 @@ https://github.com/openai/openai-cookbook/blob/d891437737cf990a84fc7ac8516d615d7
 将此功能封装成gpt插件
 
 或者将此功能做的更加灵活，内容可以随时添加或更新
+
+## 初步结果
+
+将wiki中2022冬奥会的内容，转换成嵌入向量，然后使用gpt生成问题答案
+对他进行提问，感觉效果还不错
+
+![效果展示](pics/pic1.png)
+
