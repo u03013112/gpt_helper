@@ -1,0 +1,8 @@
+openai
+rpyc
+pandas
+tiktoken
+scipy
+
+mwclient
+mwparserfromhell

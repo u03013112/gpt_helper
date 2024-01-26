@@ -7,6 +7,7 @@ services:
     tty: true
     volumes:
         - ../src:/src
+        - ../data:/data
     ports:
       - 2999:8000
     logging:
