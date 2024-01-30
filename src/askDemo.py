@@ -5,6 +5,7 @@ import pandas as pd  # for storing text and embeddings data
 import tiktoken  # for counting tokens
 import os # for getting API token from env variable OPENAI_API_KEY
 from scipy import spatial  # for calculating vector similarities for search
+import time
 
 import sys
 sys.path.append('/')
@@ -103,8 +104,13 @@ class askFor2022WinterOlympics():
         token_budget: int = 1024*7 - 500,
         print_message: bool = False,
     ) -> str:
+        t0 = time.time()
+
         """Answers a query using GPT and a dataframe of relevant texts and embeddings."""
         message = self.query_message(query, self.df, model=GPT_MODEL, token_budget=token_budget)
+
+        print(f"Time to generate message: {time.time() - t0:.2f} seconds")
+
         if print_message:
             print(message)
         messages = [
@@ -117,6 +123,9 @@ class askFor2022WinterOlympics():
             temperature=0
         )
         response_message = response.choices[0].message.content
+
+        print(f"Time to generate response: {time.time() - t0:.2f} seconds")
+
         print(response_message)
         return response_message
     
@@ -170,8 +179,14 @@ class askFor2022WinterOlympics():
         print(response_message)
         return response_message
     
+
 if __name__ == "__main__":
+    startTime = time.time()
     askFor2022WinterOlympics = askFor2022WinterOlympics()
+    print('init time:',time.time()-startTime)
+
     askFor2022WinterOlympics.ask('Which athletes won the gold medal in curling at the 2022 Winter Olympics?',model='bigpt4')
+
+
     askFor2022WinterOlympics.ask('中国是否有参加2022冬奥会？',model='bigpt4')
     askFor2022WinterOlympics.ask('中国在2022冬奥会表现怎么样，主要从金牌总数，奖牌总数，和金牌总数国家排名，奖牌总数国家排名来说说。',model='bigpt4')
