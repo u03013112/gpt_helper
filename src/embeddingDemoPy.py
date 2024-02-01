@@ -127,7 +127,7 @@ def debug():
     print(df)
 
 if __name__ == '__main__':
-    # embedding()
+    embedding()
 
     df = pd.read_csv('/data/embeddedCode_src.csv')
     df['embedding'] = df['embedding'].apply(ast.literal_eval)

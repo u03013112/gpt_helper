@@ -1,7 +1,12 @@
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 
-from askDemo import askFor2022WinterOlympics
+import sys
+sys.path.append('/')
+
+from src.askDemo import askFor2022WinterOlympics
+from src.httpd.downloadFromGithub import DownloadFromGithub
+from src.httpd.status import getStatus
 
 app = Flask(__name__)
 CORS(app)  # 这将使您的Flask应用支持CORS
@@ -25,7 +30,21 @@ def reflush():
     askFor2022WinterOlympics.reflush()
     return 'ok'
 
+@app.route('/download_github_project', methods=['POST'])
+def download_github_project():
+    # 获取GitHub项目的URL
+    github_url = request.json['github_url']
+    
+    # 下载项目
+    downloader = DownloadFromGithub(github_url)
+    downloader.start()
 
+    return 'ok'
+
+@app.route('/get_status', methods=['GET'])
+def get_status():
+    df = getStatus()
+    return df.to_json(orient='records')
 
 if __name__ == '__main__':
 
