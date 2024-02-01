@@ -20,16 +20,12 @@ def handle_post_request():
 
     return content
 
-    response = {
-        'choices':[
-            {
-                'message':{}
-            }
-        ]
-    }
-    response['choices'][0]['message']['content'] = content
+@app.route('/api/reflush', methods=['GET'])
+def reflush():
+    askFor2022WinterOlympics.reflush()
+    return 'ok'
 
-    return jsonify(response)
+
 
 if __name__ == '__main__':
 

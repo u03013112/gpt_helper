@@ -46,7 +46,7 @@ class SegmentPyFile():
                 codePathList.append(newPrefix)
                 startLineNoList.append(child.lineno)
                 codeTypeList.append(child.__class__.__name__)
-                codeContentList.append(codeContent)
+                codeContentList.append(codeContentStr)
                 tokenCountList.append(tokenCount)
             else:
                 has_children = False
@@ -61,7 +61,7 @@ class SegmentPyFile():
                         codePathList.append(newPrefix)
                         startLineNoList.append(child.lineno)
                         codeTypeList.append(child.__class__.__name__)
-                        codeContentList.append(codeContent)
+                        codeContentList.append(codeContentStr)
                         tokenCountList.append(tokenCount)
                     break
                 if not has_children:

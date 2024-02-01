@@ -10,6 +10,7 @@ def embedding():
     df = pd.read_csv('/data/segmentedCode_src.csv')
     # 进行一些过滤，codeType:Import 
     df = df[df['codeType'] != 'Import']
+    df = df[df['codeType'] != 'ImportFrom']
 
     # 将 codePath,startLineNo,codeType,codeContent 合并成一个字符串
     # 按照格式：'codePath':codePath + '\n' + 'startLineNo':startLineNo + '\n' + 'codeType':codeType + '\n' + 'codeContent':codeContent
@@ -22,7 +23,7 @@ startLineNo:{row['startLineNo']}
 codeType:{row['codeType']}
 codeContent:{row['codeContent']}
         ''')
-    print(textList[0])
+    # print(textList[0])
     df = embed(textList)
     df.to_csv('/data/embeddedCode_src.csv', index=False)
 
@@ -46,17 +47,42 @@ def strings_ranked_by_relatedness(
         strings, relatednesses = zip(*strings_and_relatednesses)
         return strings[:top_n], relatednesses[:top_n]
 
+# def query_message(
+#         query: str,
+#         df: pd.DataFrame,
+#         token_budget: int
+#     ) -> str:
+#         """Return a message for GPT, with relevant source texts pulled from a dataframe."""
+#         strings, relatednesses = strings_ranked_by_relatedness(query, df)
+#         introduction = '下面是有关GPT_HELPER的代码片段，如果问到相关问题，请参阅下面的代码片段。如果代码片段中没有答案，请写“我找不到答案。”'
+#         question = f"\n\nQuestion: {query}"
+#         message = introduction
+#         for string in strings:
+#             next_article = f'\n\n代码片段:\n"""\n{string}\n"""'
+#             if (
+#                 num_tokens(message + next_article + question)
+#                 > token_budget
+#             ):
+#                 break
+#             else:
+#                 message += next_article
+#         return message + question
+
 def query_message(
         query: str,
         df: pd.DataFrame,
-        token_budget: int
+        token_budget: int,
+        max_articles: int
     ) -> str:
         """Return a message for GPT, with relevant source texts pulled from a dataframe."""
         strings, relatednesses = strings_ranked_by_relatedness(query, df)
         introduction = '下面是有关GPT_HELPER的代码片段，如果问到相关问题，请参阅下面的代码片段。如果代码片段中没有答案，请写“我找不到答案。”'
         question = f"\n\nQuestion: {query}"
         message = introduction
+        article_count = 0
         for string in strings:
+            if article_count >= max_articles:
+                break
             next_article = f'\n\n代码片段:\n"""\n{string}\n"""'
             if (
                 num_tokens(message + next_article + question)
@@ -65,8 +91,8 @@ def query_message(
                 break
             else:
                 message += next_article
+                article_count += 1
         return message + question
-
     
 def ask(
         query: str,
@@ -76,12 +102,11 @@ def ask(
         df: pd.DataFrame = None
     ) -> str:
         """Answers a query using GPT and a dataframe of relevant texts and embeddings."""
-        message = query_message(query, df, token_budget=token_budget)
+        message = query_message(query, df, token_budget=token_budget,max_articles=10)
 
         if print_message:
             print(message)
         messages = [
-            {"role": "system", "content": "You answer questions about the 2022 Winter Olympics."},
             {"role": "user", "content": message},
         ]
         response = client.chat.completions.create(
@@ -94,6 +119,12 @@ def ask(
         print(response_message)
         return response_message
     
+def debug():
+    df = pd.read_csv('/data/segmentedCode_src.csv')
+    df = df[df['codeType'] != 'Import']
+    df = df[df['codeType'] != 'ImportFrom']
+
+    print(df)
 
 if __name__ == '__main__':
     # embedding()
@@ -101,6 +132,16 @@ if __name__ == '__main__':
     df = pd.read_csv('/data/embeddedCode_src.csv')
     df['embedding'] = df['embedding'].apply(ast.literal_eval)
 
-    ask('告诉我GPT_HELPER是怎么将py代码分段的，大致过程是什么样的？',df = df)
-    ask('告诉我GPT_HELPER是怎么将分段的代码转换成embedding的，主要的步骤？',df = df)
-    ask('我想完善GPT_HELPER，比如希望他可以对其他语言，比如golang也进行分段，应该怎么做？',df = df)
+    questions = [
+        # 'SegmentPyFile.py 这个文件主要功能，和主要步骤，如果有必要可以将重要的代码片段贴出来',
+        'httpd.py 这个文件主要功能。代码是否有问题，有什么可以改进的地方',
+        # 'query_message 这个方法是在想定的token中尽可能的插入参考数据，我觉得插入太多的参考数据没有价值，所以做限定，给这个方法添加一个参数N，即在token足够的情况下，最多插入N条数据，再多就不要了。帮我重写一下这个方法',
+    ]
+
+    for question in questions:
+        print('question:',question)
+        ask(question,df = df)
+
+    
+     
+    # debug()

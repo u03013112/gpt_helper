@@ -38,7 +38,7 @@ def num_tokens(text: str, model: str = GPT_MODEL) -> int:
 
 class askFor2022WinterOlympics():
     def __init__(self):
-        embeddings_path = "/data/winter_olympics_2022.csv"
+        embeddings_path = "/data/data.csv"
         df = pd.read_csv(embeddings_path)
         df['embedding'] = df['embedding'].apply(ast.literal_eval)
         self.df = df
@@ -138,11 +138,11 @@ class askFor2022WinterOlympics():
         """Return a message for GPT, with relevant source texts pulled from a dataframe."""
         strings, relatednesses = self.strings_ranked_by_relatedness(query, df)
         # introduction = 'Use the below articles on the 2022 Winter Olympics to answer the subsequent question. If the answer cannot be found in the articles, write "I could not find an answer."'
-        introduction = '下面是一些有关2022年冬奥会的文章，如果你用的上可以参考这些，如果用不上请忽略这部分内容，专注于聊天内容。'
+        introduction = '下面是一些往外的参考数据，如果你用的上可以参考这些，如果用不上请忽略这部分内容，专注于聊天内容。'
         question = f"\n\nQuestion: {query}"
         message = introduction
         for string in strings:
-            next_article = f'\n\nWikipedia article section:\n"""\n{string}\n"""'
+            next_article = f'\n\n参考数据:\n"""\n{string}\n"""'
             if (
                 num_tokens(message + next_article + question, model=model)
                 > token_budget
@@ -179,6 +179,13 @@ class askFor2022WinterOlympics():
         print(response_message)
         return response_message
     
+
+    def reflush(self):
+        embeddings_path = "/data/data.csv"
+        df = pd.read_csv(embeddings_path)
+        df['embedding'] = df['embedding'].apply(ast.literal_eval)
+        self.df = df
+        print('reflush ok')
 
 if __name__ == "__main__":
     startTime = time.time()
